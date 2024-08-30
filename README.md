@@ -3,13 +3,14 @@
 
 This is the result of my research - I will show you everything you need to know in order to run my test programs, tell you about some reocurring errors and show how to avoid them.
 
-## First, let's take a look at my Dockerfile where the whole setup takes place:
+# 1) First, let's take a look at my Dockerfile where the whole setup takes place:
 ## Dockerfile analysis
 * [Packages and compilers](#package-installation)
 * [Work directory](#work-directory)
 * [C++ compilation](#c++-compilation)
 * [Fortran compilation](#fortran-compilation)
 * [Java compilation](#java-compilation)
+* [Enviromental variables](#enviromental-variables)
 
 ## Package installation:
 - As you can see, I started by pulling the official julia image in the first line.
@@ -53,3 +54,20 @@ RUN javac Animal.java Zoo.java javaTest.java
 ```
 - **Note:** we compile it as a shared library file in order to use it later on in the Julia script, be sure to add **"-shared"** and **"-fPIC"** flags!
 
+
+## Enviromental variables:
+
+- Make sure that JVM (Java Virtual Machine) knows where to find the compiled classes when running the Julia script:
+```
+ENV CLASSPATH /app
+```
+- Add the following to my Dockerfile so Julia knows where to look for the libraries (/app is my work directory set by WORKDIR):
+```
+ENV LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
+```
+- In order to avoid warning or error messages, be sure to set:
+```
+ENV JULIA_COPY_STACKS=1
+```
+
+# 2) Binding with Julia
