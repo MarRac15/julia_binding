@@ -5,7 +5,7 @@ lib_cpp = "libcppLib"
 lib_fort = "libFortran"
 
 #JVM init:
-JavaCall.init(["-Djava.class.path=$classpath"])
+#JavaCall.init(["-Djava.class.path=$classpath"])
 
 #import java classes:
 Animal = @jimport Animal
@@ -18,6 +18,7 @@ my_animal_2 = Animal((jstring, jint, jboolean), "turtle", 78, false)
 #call java methods:
 animal_1_age = jcall(my_animal_1, "getAge", jint)
 animal_2_age = jcall(my_animal_2, "getAge", jint)
+print('\n')
 println("elephant's age is: $animal_1_age")
 println("turtle's age is: $animal_2_age")
 
@@ -45,3 +46,4 @@ end
 
 print('\n')
 
+JavaCall.destroy()

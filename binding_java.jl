@@ -5,7 +5,7 @@ classpath="/app"
 print("Java here!")
 
 #JVM init:
-# JavaCall.init(["-Djava.class.path=$classpath"])
+JavaCall.init(["-Djava.class.path=$classpath"])
 
 #import classes:
 Animal = @jimport Animal
@@ -62,4 +62,3 @@ println("The first animal specie is: $firstAnimal_specie")
 # end
 
 
-JavaCall.destroy()
