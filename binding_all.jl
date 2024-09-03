@@ -10,10 +10,9 @@ lib_fort = "libFortran"
 #import java classes:
 Animal = @jimport Animal
 Zoo = @jimport Zoo 
-jstring = @jimport java.lang.String
 
-my_animal_1 = Animal((jstring, jint, jboolean), "elephant", 9, true)
-my_animal_2 = Animal((jstring, jint, jboolean), "turtle", 78, false)
+my_animal_1 = Animal((JString, jint, jboolean), "elephant", 9, true)
+my_animal_2 = Animal((JString, jint, jboolean), "turtle", 78, false)
 
 #call java methods:
 animal_1_age = jcall(my_animal_1, "getAge", jint)
