@@ -13,16 +13,34 @@ This is the result of my research - I will show you everything you need to know 
 * [Enviromental variables](#enviromental-variables)
 
 ## Package installation:
-- As you can see, I started by pulling the official julia image in the first line.
+
+- As you can see, I started by pulling the official julia image in the first line:
+  ```dockerfile
+  FROM julia:latest
+  ```
+  
 - Then, I run commands to install all the compilers:
-![obraz](https://github.com/user-attachments/assets/637e1741-4ac1-4fb5-9be9-ac1872cd8a45)
+  ```dockerfile
+  RUN apt-get update && \
+      apt-get install -y --no-install-recommends \
+      g++ \
+      gcc \
+      gfortran \
+      build-essential \
+      openjdk-17-jdk 
+  ```
+
 - Julia packages are installed here:
-![obraz](https://github.com/user-attachments/assets/118cbd2f-5dd4-4f44-a541-5f8d0e4ae073)
+  ```dockerfile
+  RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
+  ```
 
 
 ## Work directory:
 - I create the new "/app" directory during the docker image building process, where all my programs are stored:
-![obraz](https://github.com/user-attachments/assets/8a82ff51-03f1-45fe-97de-995c970315c3)
+  ```dockerfile
+  WORKDIR /app
+  ```
 
 ## <a id="c++-compilation"></a> C++ compilation:
 - First, we copy the .cpp file into the work directory ('./' is the relative path to the current working directory)
@@ -65,7 +83,7 @@ RUN javac Animal.java Zoo.java javaTest.java
 ```dockerfile
 ENV CLASSPATH /app
 ```
-- Add the following to my Dockerfile so Julia knows where to look for the libraries (/app is my work directory set by WORKDIR):
+- I added the following to my Dockerfile so Julia knows where to look for the libraries (/app is my work directory set by WORKDIR):
   
 ```dockerfile
 ENV LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
@@ -204,8 +222,11 @@ ccall((:even_odd, "libFortran"), Cvoid, (Ref{Int32},), 7)
 > You can import classes from .java files and .jar files as well.
 
 
+
 ### Explanation and instructions:
 
+
+#### Preperations and first steps:
 
 - Make sure that you have installed the JavaCall package (like I did in my Dockerfile):
 ```dockerfile
@@ -215,4 +236,206 @@ RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
   These are basic classes with some really simple functions.
 
 
-- Go to the _binding_java.jl_ file
+- Go to the _binding_java.jl_ where the import takes place.
+- Be sure to inlcude `using JavaCall` at the start of your file
+
+- It's best to define the _classpath_ which can then be used in the JVM (Java Virtual Machine) initialization
+- I initialised JVM (Java Virtual Machine) by adding:
+  ```
+  JavaCall.init([-Djava.class.apth=$classpath])
+  ```
+  where classpath is your path in a string
+  - **Note:** only one JVM can be initialised within a process
+  - **Note:** if you're using a JAR file, then remember to include it in the classpath
+
+  
+#### Importing classes:
+
+- Importing classes is done by the @jimport keyword:
+  ```julia
+  Animal = @jimport Animal
+  Zoo = @jimport Zoo
+  ```
+  - **Note:** it's best to assign the imported class to a variable just like I did it above
+
+
+#### Calling constructors:
+
+- Object initialisation via constructor is fairly simple and very intuitive:
+  
+  ```julia
+  my_animal = Animal((jstring, jint, jboolean), "tiger", 7, true)
+  my_animal_2 = Animal((jstring, jint, jboolean), "crocodile", 2, false)
+  smallZoo = Zoo()
+  ```
+
+  - **Note:** It works just like in every object-oriented language, but you provide **types of your parameters** first (as a tuple!) in order to avoid conflicts with java types
+
+
+#### Calling java methods:
+
+- **jcall()** function allows you to run methods on your objects and much more. You'd use it a lot, because JavaCall provides only a low interface
+  
+- I use jcall() here to call "addToZoo" method on a smallZoo object:
+  ```julia
+  jcall(smallZoo, "addToZoo", jvoid, (Animal,), my_animal)
+  ```
+- **Syntax for jcall()** looks like this:
+  ```julia
+  jcall(java_object_receiver, "function_name", return_type, (argument_type1, ), argument1)
+  ```
+
+- Of course, you can also assign it to the variable where there is a return value from your method:
+  ```julia
+  precious_animal = jcall(my_animal, "getSpecies", jstring)
+  ```
+
+#### Accessing fields:
+
+- Accessing object's fields is done by calling the **jfield()** function. Example:
+
+  ```julia
+  animals_age = jfield(my_animal, "age", jint)
+  ```
+  
+- **Syntax for jfield()** looks like this:
+
+```julia
+jfield(java_object, "field_name", field's type)
+```
+
+> If you have getters in your class, then you can just use jcall() to access fields
+
+#### Java types:
+> The Java primitive types are aliased to their corresponding types in Julia. That's why it's best to use these aliases.
+
+- The aliases to use:
+
+| Java Type        | Julia Alias|       
+| ------------- |:-------------:|
+| boolean      | jboolean |
+| char      | jchar      |
+| int | jint      |
+| long      | jlong |
+| float      | jfloat      |
+| double | jdouble      |
+
+- **Note:** A Java String is represented as a **JString** type.
+
+- If your type is an object, then **JavaObject** can represent it:
+```
+JavaObject{:T}
+```
+where T is referring to a Java class name.  
+Example in my code:
+```julia
+firstAnimal = jcall(smallZoo, "getFirstAnimal", JavaObject{:Animal})
+```
+> You can use `JavaObject{Symbol("java_class_name")}` to indicate the specific Java class. Try it if the first approach doesn't work.
+
+#### The rest of my code:
+
+> I call the jcall() function many times in my code in order to test all my methods
+
+- 
+
+#### Known issues:
+
+There is one major issue that I encountered and wasn't able to fix:
+It occurs while calling jcall() on an array/array lists of objects when you need to specify the "return type".  
+It causes JNI not to recognize the method, probably beacuse it cannot match the types.
+
+
+- Example - I have the following array list:
+```julia
+animals_array = jcall(smallZoo, "getAnimals", JavaObject{Symbol("java.util.ArrayList")})
+```
+code in _Zoo.java_ for reference:
+```java
+    public ArrayList<Animal> animals;
+
+    public ArrayList<Animal> getAnimals()
+    {
+        return animals;
+    }
+```
+
+- The error occurs here:
+```julia
+animal = jcall(animals_array, "get", JavaArray{:Animal}, jint, i)
+```
+The same error is called here:
+```julia
+animals_array2 = jfield(smallZoo, "animals", JavaObject{Symbol("LAnimal;")})
+```
+I tried experimenting with the JavaObject syntax but nothing seems to work properly (LAnimal indicates that it is an array of the Animal type).
+It is clearly the problem with the return type, so the JNI doesn't recognize the correct method
+
+- On the contrary - returning a single object (e.g.: the first object in an array) works like a charm.  
+  This works because jcall() is not called on an array:
+  ```julia
+  firstAnimal = jcall(smallZoo, "getFirstAnimal", JavaObject{:Animal})
+  ```
+
+
+# 3) Binding all these languages in a single file:
+
+> Finally , I created a small test presenting the exchange of information between the imported functions from different languages.
+
+  Take a look at my _binding_all.jl_ file and follow my explanation. I also added a few helpful comments next to the code.
+
+Quick explanation on what it does:
+
+- First, I import the JavaCall package and define the libraries.
+- Next, I import the Java classes and create 2 animals via constructor.
+- Then, I get access to animals' age values by using the getters and the jcall() function.
+- Next, I use the said age values in the C++ function and compute their NWD.
+- Then, I import the function "isPrime" from another **julia file** (called _secondTest.jl_) and module:
+  ```julia
+  include("secondTest.jl")
+  using .secondTest
+  ```
+  The other file (_secondTest.jl_) looks like this:
+  ```julia
+  module secondTest
+
+    export isPrime
+
+    function isPrime(n)
+        if n<=1
+            return false    
+        end
+
+        if n==2
+            return true
+        else
+            for i in 2:n-1
+
+                if n%i == 0
+                    return false
+                end
+
+                return true
+            end
+        end
+    end
+  ```
+  Remember to add the `export your_function_name` at the start of the module!
+  
+- I check if the NWD is a prime number by using the imported julia function.
+- Finally, I import the Fortran function and based on the result of the "isPrime" function, I provide either 10 or 20 as the argument.
+- At the end of the file, I use `JavaCall.destroy()` to end the JVM session.
+
+
+# 4) Starting my demo:
+
+> Everything will work inside the Docker container and is already configured so it should take only 2 commands to run my test programs from this repo.
+
+1. In your terminal, make sure that you're inside the directory where you cloned this repository
+2. Run `docker build -t your_name .`
+3. Run `docker run --rm your_name`
+4. The printed results of my programs should now be visible in the terminal:
+   - first: C++ function results
+   - then: Fortran subroutine results
+   - then: Java methods results
+   - at last: combined prints of all these languages running from the _binding_all.jl_ file
