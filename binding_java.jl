@@ -48,14 +48,14 @@ firstAnimal_specie = jcall(firstAnimal, "getSpecies", JString)
 println("The first animal specie is: $firstAnimal_specie")
 
 
-#----------------------------------------
+#--------------this doesnt work:--------------------------
 
-for i in 0:num_of_animals-1
-    #error:
-    animal = jcall(animals_array, "get", JavaArray{Animal}, jint, i)
-    ##
-    species = jcall(animal, "getSpecies", jstring)
-    print("Animal at index $i is $species")
-end
+# for i in 0:num_of_animals-1
+#     #error:
+#     animal = jcall(animals_array, "get", JavaArray{Animal}, jint, i)
+#     ##
+#     species = jcall(animal, "getSpecies", JString)
+#     print("Animal at index $i is $species")
+# end
 
 
