@@ -102,7 +102,7 @@ ENV JULIA_COPY_STACKS=1
 <br></br>
 # 2) Binding with Julia
 
-* <a href="c++binding">C++ compilation</a>
+* <a href="c++-binding">C++ compilation</a>
 * [Binding Fortran](#binding-fortran)
 * [Binding Java](#binding-java)
 
