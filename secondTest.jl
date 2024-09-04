@@ -1,4 +1,4 @@
-module secondTest
+module binding
 
     export isPrime
 
@@ -45,3 +45,6 @@ module secondTest
     end
 
 end
+
+
+

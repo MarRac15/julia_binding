@@ -32,6 +32,6 @@ ENV JULIA_COPY_STACKS=1
 #set this so julia knows where to look for the libraries
 ENV LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
  
-COPY ./secondTest.jl ./binding_cpp.jl ./binding_java.jl ./binding_fort.jl ./binding_all.jl ./
+COPY ./first_test.jl ./secondTest.jl ./binding_cpp.jl ./binding_java.jl ./binding_fort.jl ./binding_all.jl ./
 
-CMD bash -c "julia -e 'include(\"binding_cpp.jl\"); include(\"binding_fort.jl\"); include(\"binding_java.jl\"); include(\"binding_all.jl\");'"
+CMD bash -c "julia -e 'include(\"binding_cpp.jl\"); include(\"binding_fort.jl\"); include(\"binding_java.jl\"); include(\"binding_all.jl\"); include(\"first_test.jl\");'"

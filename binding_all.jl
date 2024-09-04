@@ -29,7 +29,7 @@ println("Nwd of $animal_1_age and $animal_2_age equals: $nwd")
 
 #import the exported function from another Julia module:
 include("secondTest.jl")
-using .secondTest
+using .binding
 
 prime = isPrime(nwd)
 println("Is $nwd prime?")
