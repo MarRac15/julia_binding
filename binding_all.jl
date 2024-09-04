@@ -18,6 +18,7 @@ my_animal_2 = Animal((JString, jint, jboolean), "turtle", 78, false)
 animal_1_age = jcall(my_animal_1, "getAge", jint)
 animal_2_age = jcall(my_animal_2, "getAge", jint)
 print('\n')
+println("Binding all - results:")
 println("elephant's age is: $animal_1_age")
 println("turtle's age is: $animal_2_age")
 
