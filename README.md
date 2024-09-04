@@ -1,8 +1,10 @@
 # Binding Julia with C++, Fortran and Java
 >This project explores the possible use cases for Julia in the Euro Fusion Project. It aims to show how well Julia integrates with native code (e.g. C++, Fortran) and how well Julia integrates with Java.
 
-This is the result of my research - I will show you everything you need to know in order to run my test programs, tell you about some reocurring errors and show how to avoid them.
+>This is the result of my research - I will show you everything you need to know in order to run my test programs, tell you about some reocurring errors and show how to avoid them.
 
+
+<br></br>
 # 1) First, let's take a look at my Dockerfile where the whole setup takes place:
 ## Dockerfile analysis
 * [Packages and compilers](#package-installation)
@@ -11,6 +13,8 @@ This is the result of my research - I will show you everything you need to know 
 * <a href="#fortran-compilation">Fortran compilation</a>
 * [Java compilation](#java-compilation)
 * [Enviromental variables](#enviromental-variables)
+
+<br></br>
 
 ## Package installation:
 
@@ -94,20 +98,24 @@ ENV LD_LIBRARY_PATH="/app:${LD_LIBRARY_PATH}"
 ENV JULIA_COPY_STACKS=1
 ```
 
+
+<br></br>
 # 2) Binding with Julia
 
-* [Binding C++](#binding-c++)
+* <a href="c++binding">C++ compilation</a>
 * [Binding Fortran](#binding-fortran)
 * [Binding Java](#binding-java)
 
 
-## Binding C++
+<br></br>
+## <a id="#c++-binding"></a>Binding C++
 
-> There are a few ways of running C++ code within Julia. I only used the simplest one as it suits best our needs. Nevertheless, I'll decribe the other ones in short:
+> There are a few ways of running C++ code within Julia. I only used the simplest one as it suits best our needs. Nevertheless, I'll decribe the other ones in short.
 
-
+  
 ### 1) The way I did it - the built in **ccall()** function (recommended):
 
+  
   #### Step by step instructions:
 
   - In the _gppTest.cpp_ file is my test C++ funtion that will be imported into Julia later on.
@@ -145,38 +153,30 @@ ENV JULIA_COPY_STACKS=1
   More on this here: https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/#mapping-c-types-to-julia
 
 
+<br></br>
 ### 2) Alternative methods:
 
-#### CxxWrap package: (WIP !!!!!)
+#### CxxWrap package: 
 
 > This way you can manipulate C++ objects and gain much more control. This is the most powerful, yet the hardest to set up tool. It would be rather unnecessary in simple scenarios.
 
-- **Overview:** you write a wrapper completely in C++ and then compile it into a shared library file. It allows you to use imported C++ classes and play with objects in Julia syntax.
-- Sources:
+- **Overview:** you write a wrapper completely in C++ and expose your classes and their methods to Julia. It is then compiled into a shared library file. After you import the library, it will allow you to use imported C++ classes and play with objects in Julia syntax.
+- Sources:  
   https://github.com/JuliaInterop/CxxWrap.jl  
   https://tianjun.me/essays/A_Guide_to_Wrap_a_C++_Library_with_CXXWrap.jl_and_BinaryBuilder.jl_in_Julia/
 
-  
-#### Basic instructions:
-- First, you need to install the package. In Dockerfile it looks like this:
-  
-```dockerfile
-RUN julia -e 'using Pkg; Pkg.add("CxxWrap")'
-```
--Your C++ code should include the necessary headers and expose your classes and functions to Julia. Example:
-```
 
-```
-- Compile your C++ program as a shared library file (just like we did <a href="#c++-compilation">here</a>)
-
+<br></br>  
 #### Cxx package:
 
-> This package allows you to write C++ code inside Julia by embedding it. For more details, check this: https://juliapackages.com/p/cxx
+> This package allows you to write C++ code inside Julia by embedding it.  
+For more details, check this: https://juliapackages.com/p/cxx
 
 
+<br></br>
 ## Binding Fortran:
 
-> Just like the C language, Fortran can be simply called from Julia by using the built-in ccall() function
+> Just like the C language, Fortran can be simply called from Julia by using the built-in ccall() function.
 
 
 ### Explanation and instructions:
@@ -184,7 +184,7 @@ RUN julia -e 'using Pkg; Pkg.add("CxxWrap")'
 - In the _fortranTest.f90_ file is my fortran subroutine that will be called from Julia later on
 
   
-- **Tip:** It is strongly recommended to add **_bind(C, name="your_func_name")_** next to your function.
+- **Tip:** it is strongly recommended to add **_bind(C, name="your_func_name")_** next to your function.
   It eliminates errors casued by name mangling (some fortran compilers change names during the compilation process).  
   Here's an example:
 
@@ -203,8 +203,8 @@ RUN julia -e 'using Pkg; Pkg.add("CxxWrap")'
   ```
 
 
-- Remember that your Fortran code has to be compiled as a **shared library** (.so file) in order to be loaded - I did this in my Dockerfile: <a href="#fortran-compilation">here</a>)
-- Next, head on to my _binding_fortr.jl_ julia file where the import takes place 
+- Remember that your Fortran code has to be compiled as a **shared library** (.so file) in order to be loaded - I did this in my Dockerfile: <a href="#fortran-compilation">here</a>).
+- Next, head on to my _binding_fortr.jl_ julia file where the import takes place.
 - Now, let's take a look at the **ccall()** function:
 ```fortran
 ccall((:even_odd, "libFortran"), Cvoid, (Ref{Int32},), 7)
@@ -213,9 +213,10 @@ ccall((:even_odd, "libFortran"), Cvoid, (Ref{Int32},), 7)
 - **Reminder:** see <a href="#ccall-syntax">ccall() syntax</a> 
 - **Reminder:** explanation on libraries names <a href="#library-name">here</a>  
 
-- **Important note:** when calling a Fortran function, all inputs must be passed as pointers to allocated values on the heap or stack. In order to avoid segmentaition fault, please add an additional Ptr{..} or Ref{..} wrapper around their type specification
+- **Important note:** when calling a Fortran function, all inputs must be passed as pointers to allocated values on the heap or stack. In order to avoid segmentaition fault, please add an additional Ptr{..} or Ref{..} wrapper around their type specification.
 
 
+<br></br>
 ## Binding Java:
 
 > It's the most advanced operation here, but provides the best functionality! I use JavaCall package that was inspired by the ccall() function, but allows you to work with Java classes.  
@@ -237,18 +238,18 @@ RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
 
 
 - Go to the _binding_java.jl_ where the import takes place.
-- Be sure to inlcude `using JavaCall` at the start of your file
+- Be sure to inlcude `using JavaCall` at the start of your file.
 
-- It's best to define the _classpath_ which can then be used in the JVM (Java Virtual Machine) initialization
+- It's best to define the _classpath_ which can then be used in the JVM (Java Virtual Machine) initialization.
 - I initialised JVM (Java Virtual Machine) by adding:
   ```
   JavaCall.init([-Djava.class.apth=$classpath])
   ```
   where classpath is your path in a string
-  - **Note:** only one JVM can be initialised within a process
-  - **Note:** if you're using a JAR file, then remember to include it in the classpath
+  - **Note:** only one JVM can be initialised within a process.
+  - **Note:** if you're using a JAR file, then remember to include it in the classpath.
 
-  
+<br></br>  
 #### Importing classes:
 
 - Importing classes is done by the @jimport keyword:
@@ -256,9 +257,10 @@ RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
   Animal = @jimport Animal
   Zoo = @jimport Zoo
   ```
-  - **Note:** it's best to assign the imported class to a variable just like I did it above
+  - **Note:** it's best to assign the imported class to a variable just like I did it above.
 
 
+<br></br>
 #### Calling constructors:
 
 - Object initialisation via constructor is fairly simple and very intuitive:
@@ -269,12 +271,13 @@ RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
   smallZoo = Zoo()
   ```
 
-  - **Note:** It works just like in every object-oriented language, but you provide **types of your parameters** first (as a tuple!) in order to avoid conflicts with java types
+  - **Note:** it works just like in every object-oriented language, but you provide **types of your parameters** first (as a tuple!) in order to avoid conflicts with java types
 
 
+<br></br>
 #### Calling java methods:
 
-- **jcall()** function allows you to run methods on your objects and much more. You'd use it a lot, because JavaCall provides only a low interface
+- **jcall()** function allows you to run methods on your objects and much more. You'd use it a lot, because JavaCall provides only a low interface.
   
 - I use jcall() here to call "addToZoo" method on a smallZoo object:
   ```julia
@@ -285,11 +288,13 @@ RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
   jcall(java_object_receiver, "function_name", return_type, (argument_type1, ), argument1)
   ```
 
-- Of course, you can also assign it to the variable where there is a return value from your method:
+- Of course, you can also assign it to the variable if there is a return value from your method:
   ```julia
   precious_animal = jcall(my_animal, "getSpecies", jstring)
   ```
 
+
+<br></br>
 #### Accessing fields:
 
 - Accessing object's fields is done by calling the **jfield()** function. Example:
@@ -304,8 +309,10 @@ RUN julia -e 'using Pkg; Pkg.add("JavaCall")'
 jfield(java_object, "field_name", field's type)
 ```
 
-> If you have getters in your class, then you can just use jcall() to access fields
+> If you have getters in your class, then you can just use jcall() to access fields.
 
+
+<br></br>
 #### Java types:
 > The Java primitive types are aliased to their corresponding types in Julia. That's why it's best to use these aliases.
 
@@ -333,13 +340,22 @@ firstAnimal = jcall(smallZoo, "getFirstAnimal", JavaObject{:Animal})
 ```
 > You can use `JavaObject{Symbol("java_class_name")}` to indicate the specific Java class. Try it if the first approach doesn't work.
 
+
+<br></br>
 #### The rest of my code:
 
-> I call the jcall() function many times in my code in order to test all my methods
+> I call the jcall() function many times in my code in order to test all my methods. Let me explain all the actions here:  
+1. I add the two previously created animals to the smallZoo (to the animals array) - "addToZoo" method.
+2. I read the first animal's species (tiger) and print it - "getSpecies" method.
+3. I chceck if the animal is in cage (true/false) - method "isInCage" checks the given specie.
+4. Results are printed.
+5. I read the number of animals in the smallZoo - "getNumberOfAnimals" method (how many objects are in the animals array).
+6. I get access to animals array - "getAnimals" method (simple getter).
+7. I get the first animal from the given array and then print the result - "getFirstAnimal" method.
 
-- 
 
-#### Known issues:
+<br></br>
+### Known issues:
 
 There is one major issue that I encountered and wasn't able to fix:
 It occurs while calling jcall() on an array/array lists of objects when you need to specify the "return type".  
@@ -369,7 +385,7 @@ The same error is called here:
 animals_array2 = jfield(smallZoo, "animals", JavaObject{Symbol("LAnimal;")})
 ```
 I tried experimenting with the JavaObject syntax but nothing seems to work properly (LAnimal indicates that it is an array of the Animal type).
-It is clearly the problem with the return type, so the JNI doesn't recognize the correct method
+It is clearly the problem with the return type, so the JNI doesn't recognize the correct method.
 
 - On the contrary - returning a single object (e.g.: the first object in an array) works like a charm.  
   This works because jcall() is not called on an array:
@@ -378,6 +394,7 @@ It is clearly the problem with the return type, so the JNI doesn't recognize the
   ```
 
 
+<br></br>
 # 3) Binding all these languages in a single file:
 
 > Finally , I created a small test presenting the exchange of information between the imported functions from different languages.
@@ -427,6 +444,7 @@ Quick explanation on what it does:
 - At the end of the file, I use `JavaCall.destroy()` to end the JVM session.
 
 
+<br></br>
 # 4) Starting my demo:
 
 > Everything will work inside the Docker container and is already configured so it should take only 2 commands to run my test programs from this repo.
@@ -435,7 +453,7 @@ Quick explanation on what it does:
 2. Run `docker build -t your_name .`
 3. Run `docker run --rm your_name`
 4. The printed results of my programs should now be visible in the terminal:
-   - first: C++ function results
-   - then: Fortran subroutine results
-   - then: Java methods results
-   - at last: combined prints of all these languages running from the _binding_all.jl_ file
+   - first: C++ function (NWD function)
+   - then: Fortran subroutine (subroutine for printing odd and even numbers)
+   - then: Java methods
+   - at last: results of all these languages working together (from _binding_all.jl_ file)
