@@ -1,5 +1,5 @@
 # Binding Julia with C++, Fortran and Java
->This project explores the possible use cases for Julia in the Euro Fusion Project. It aims to show how well Julia integrates with native code (e.g. C++, Fortran) and how well Julia integrates with Java. In addition, there is test of running workflows in Julia.
+>This project explores the possible use cases for Julia in the Euro Fusion Project. It aims to show how well Julia integrates with native code (e.g. C++, Fortran) and how well Julia integrates with Java. In addition, there is a test of running workflows in Julia.
 
 >This is the result of my research - I will show you everything you need to know in order to run my test programs, tell you about some reocurring errors and show how to avoid them.
 
@@ -47,7 +47,7 @@
   ```
 
 ## <a id="c++-compilation"></a> C++ compilation:
-- First, we copy the .cpp file into the work directory ('./' is the relative path to the current working directory)
+- First, we copy the .cpp file into the work directory ('./' is the relative path to the current working directory).
 - Compilation is done by the g++ compiler:
   
 ```dockerfile
@@ -59,7 +59,7 @@ RUN g++ -shared -o libcppLib.so -fPIC gppTest.cpp
 
 ## Fortran compilation:
 
-- First, we copy the .f90 file into the work directory ('./' is the relative path to the current working directory)
+- First, we copy the .f90 file into the work directory ('./' is the relative path to the current working directory).
 - Compilation is handled by the gfortran compiler:
   
 ```dockerfile
@@ -70,7 +70,7 @@ RUN gfortran -shared -o libFortran.so -fPIC fortranTest.f90
 
 ## Java compilation:
 
-- First, we copy the .java files into the work directory ('./' is the relative path to the current working directory)
+- First, we copy the .java files into the work directory ('./' is the relative path to the current working directory).
 - Compilation is handled by the OpenJDK compiler:
   
 ```dockerfile
@@ -124,8 +124,8 @@ ENV JULIA_COPY_STACKS=1
   ```c++
     extern "C"{ your C++ code ........ }
   ```
-  - Remember that your C++ code has to be compiled as a **shared library** (.so file) in order to be loaded - I did this in my Dockerfile (<a href="#c++-compilation">see here</a>)
-  - Next, head on to my _binding_cpp.jl_ julia file where the import takes place 
+  - Remember that your C++ code has to be compiled as a **shared library** (.so file) in order to be loaded - I did this in my Dockerfile (<a href="#c++-compilation">see here</a>).
+  - Next, head on to my _binding_cpp.jl_ julia file where the import takes place.
   - The only I had to do was to call the **ccall()** function:
     ```julia
     result = ccall((:NWD, "libcppLib"), Int32, (Int32, Int32), 12, 56)
@@ -181,7 +181,7 @@ For more details, check this: https://juliapackages.com/p/cxx
 
 ### Explanation and instructions:
 
-- In the _fortranTest.f90_ file is my fortran subroutine that will be called from Julia later on
+- In the _fortranTest.f90_ file is my fortran subroutine that will be called from Julia later on.
 
   
 - **Tip:** it is strongly recommended to add **_bind(C, name="your_func_name")_** next to your function.
