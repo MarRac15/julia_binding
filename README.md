@@ -102,13 +102,13 @@ ENV JULIA_COPY_STACKS=1
 <br></br>
 # 2) Binding with Julia
 
-* <a href="c++-binding">C++ compilation</a>
+* <a href="#binding-c++">Binding C++</a>
 * [Binding Fortran](#binding-fortran)
 * [Binding Java](#binding-java)
 
 
 <br></br>
-## <a id="#c++-binding"></a>Binding C++
+## <a id="binding-c++"></a>Binding C++
 
 > There are a few ways of running C++ code within Julia. I only used the simplest one as it suits best our needs. Nevertheless, I'll decribe the other ones in short.
 
