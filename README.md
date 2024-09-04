@@ -410,11 +410,11 @@ Quick explanation on what it does:
 - Then, I import the function "isPrime" from another **julia file** (called _secondTest.jl_) and module:
   ```julia
   include("secondTest.jl")
-  using .secondTest
+  using .binding
   ```
   The other file (_secondTest.jl_) looks like this:
   ```julia
-  module secondTest
+  module binding
 
     export isPrime
 
@@ -445,7 +445,14 @@ Quick explanation on what it does:
 
 
 <br></br>
-# 4) Starting my demo:
+# 4) Julia workflow:
+
+> This is the pure Julia code and it is supposed to show that Julia can execute one code after another. Everything is in the **_first_test.jl_** file.
+In my Dockerfile, it is executed as the last one.
+
+
+<br></br>
+# 5) Starting my demo:
 
 > Everything will work inside the Docker container and is already configured so it should take only 2 commands to run my test programs from this repo.
 
@@ -456,4 +463,5 @@ Quick explanation on what it does:
    - first: C++ function (NWD function)
    - then: Fortran subroutine (subroutine for printing odd and even numbers)
    - then: Java methods
-   - at last: results of all these languages working together (from _binding_all.jl_ file)
+   - next: results of all these languages working together (from _binding_all.jl_ file)
+   - at last: test of the julia worfkflow (from _first_test.jl_ file)
