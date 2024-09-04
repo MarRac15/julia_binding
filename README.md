@@ -1,5 +1,5 @@
 # Binding Julia with C++, Fortran and Java
->This project explores the possible use cases for Julia in the Euro Fusion Project. It aims to show how well Julia integrates with native code (e.g. C++, Fortran) and how well Julia integrates with Java. In addition, there is a test of running workflows in Julia.
+>This project explores the possible use cases for Julia in the Euro Fusion Project. It aims to show how well Julia integrates with native code (e.g. C++, Fortran) and how well Julia integrates with Java. At the same time, it works as a really simple example of running workflows - codes from various languages are executed one after another
 
 >This is the result of my research - I will show you everything you need to know in order to run my test programs, tell you about some reocurring errors and show how to avoid them.
 
@@ -445,9 +445,9 @@ Quick explanation on what it does:
 
 
 <br></br>
-# 4) Julia workflow:
+# 4) Pure Julia code:
 
-> This is the pure Julia code and it is supposed to show that Julia can execute one code after another. Everything is in the **_first_test.jl_** file.
+> This is the pure Julia code to test along with the other files that together make up the sample workflow. Take a look at the **_first_test.jl_** file.
 In my Dockerfile, it is executed as the last one.
 
 
@@ -464,4 +464,4 @@ In my Dockerfile, it is executed as the last one.
    - then: Fortran subroutine (subroutine for printing odd and even numbers)
    - then: Java methods
    - next: results of all these languages working together (from _binding_all.jl_ file)
-   - at last: test of the julia worfkflow (from _first_test.jl_ file)
+   - at last: test of the julia code (from _first_test.jl_ file)
